@@ -1,73 +1,41 @@
-job1:
-
-pipeline {
-    
-    agent {
-        label 'tests'
-    }
-    stages {
-        stage('scm') {
-            steps {
-                git url:'https://github.com/naveenmenda/website.git', branch:'develop'
-                
-            }
-        }
-        stage('build the dockerfile') {
-            steps {
-               sh 'sudo docker build /home/ubuntu/jenkins/workspace/project1/ -t  buildapp'
-               sh 'sudo docker run -itd -p 90:80 buildapp' 
-                
-            }
-        }
-    }
-}
-
-
-job2:
-
 pipeline{
-    agent {
-        label 'tests'
-    }
-    
-    stages{
-        stage('scm'){
-            steps{
-                git url : 'https://github.com/naveenmenda/website.git', branch: 'master'
-                
-            }
-        }
-        stage('build the docker file'){
-            steps{
-             sh 'sudo docker rm -f $(sudo docker ps -qa)'
-             sh 'sudo docker build /home/ubuntu/jenkins/workspace/project2/ -t testapp'
-             sh 'sudo docker run -itd -p 91:80 testapp'
-            }
-        }
-    }
+
+agent {
+label 'k8_master'
 }
 
-job3:
+stages{
 
-pipeline{
-    agent {
-        label 'prods'
-    }
-    
-    stages{
-        stage('scm clone'){
-            steps{
-                git url:'https://github.com/naveenmenda/website.git', branch:'master'
-            }
-        }
-        stage('buile the dockerfile'){
-            steps{
-                sh 'sudo docker rm -f $(sudo docker ps -qa)'
-                sh 'sudo docker build /home/ubuntu/jenkins/workspace/project3/ -t finallapp'
-                sh 'sudo docker run -itd -p 88:80 finallapp'
-            }
-        }
-    }
+stage('Hello world'){
+steps{
+echo "Hello World"
+}
 }
 
+stage('scm repo'){
+steps{
+git url :'https://github.com/naveenmenda/website.git',branch:'master'
+}
+}
+stage('build the docker file'){
+steps{
+sh 'sudo docker build /home/ubuntu/jenkins/workspace/project2 -t naveen1406/webapp'
+
+}
+}
+stage('dokcerhub login and push'){
+steps{
+withCredentials([string(credentialsId: 'Dockerhub', variable: 'Dockerhub')]) {
+sh 'sudo docker login -u naveen1406 -p ${Dockerhub}'
+sh 'sudo docker push naveen1406/webapp'
+}
+}
+}
+stage('deploy k8 master'){
+steps{
+sh 'kubectl apply -f deploy.yml'
+}
+}
+}
+}
 

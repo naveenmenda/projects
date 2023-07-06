@@ -1,0 +1,14 @@
+- name: installion on name: installion on master    
+  hosts: master
+  become: yes
+  tasks: 
+    name: installing k8 & docker & java
+    script: master.sh
+
+worker
+hosts: worker
+become: yes
+tasks:
+name: installing k8 & docker 
+script: slave1.sh
+
