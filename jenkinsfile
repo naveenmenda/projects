@@ -1,0 +1,24 @@
+job1:
+
+pipeline {
+    
+    agent {
+        label 'tests'
+    }
+    stages {
+        stage('scm') {
+            steps {
+                git url:'https://github.com/naveenmenda/website.git', branch:'develop'
+                
+            }
+        }
+        stage('build the dockerfile') {
+            steps {
+               sh 'sudo docker build /home/ubuntu/jenkins/workspace/project1/ -t  buildapp'
+               sh 'sudo docker run -itd -p 90:80 buildapp' 
+                
+            }
+        }
+    }
+}
+
